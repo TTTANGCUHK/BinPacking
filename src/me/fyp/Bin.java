@@ -1,19 +1,57 @@
 package me.fyp;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 public class Bin {
-    private int height, width, remainingHeight, remainingWidth, itemArea;
+    private int xLoc, yLoc, height, width, remainingHeight, remainingWidth, upperRemainingWidth;
+    private boolean isFull = false;
     private ArrayList<Item> itemList;
 
-    public Bin(int height, int width) {
+    // These 2 variables will store for the class instead of the object
+    // Meaning all Bin Object will share the same variables.
+    private static int widthDistance = 0;
+    private static int heightDistance = Main.IMAGE_HEIGHT;
+
+    public void resetDistance() {
+        widthDistance = 0;
+        heightDistance = Main.IMAGE_HEIGHT;
+    }
+
+    public Bin(Graphics pen, int height, int width) {
+        // Size of the bin
         this.height = height;
         this.width = width;
+
+        // A list to store items that packed into the bin
         itemList = new ArrayList<>();
-        itemArea = 0;
+
+        // Variables to store the remaining Height / Width
         remainingHeight = height;
         remainingWidth = width;
+
+        // Variables to calculate the location that placing the bin
+        if (widthDistance + width > Main.IMAGE_WIDTH) {
+            widthDistance = 0;
+            heightDistance -= (height + 5);
+        }
+        // Set the paint color of bin
+        pen.setColor(Color.WHITE);
+
+        // Update the location of the bin
+        xLoc = widthDistance + 5;
+        yLoc = heightDistance - height - 5;
+
+        // Paint the bin
+        pen.fillRect(xLoc, yLoc, width, height);
+
+        // Update the distance for the location of next bin
+        widthDistance += width + 5;
     }
+
+    public int getXLoc() { return xLoc; }
+
+    public int getYLoc() { return yLoc; }
 
     public int getHeight() {
         return height;
@@ -31,23 +69,50 @@ public class Bin {
         return remainingWidth;
     }
 
-    public int getArea() {
-        return getHeight() * getWidth();
+    public void setRemainingHeight(int remainingHeight) {
+        this.remainingHeight = remainingHeight;
     }
 
-    // NEED TO DO THE CHECKING IF THE BIN HAS ENOUGH SPACE TO ADD THE ITEM
-    public boolean addItem(Item item) {
-        if (getArea() > itemArea + item.getArea()) {
-            itemList.add(item);
-            itemArea += item.getArea();
-            remainingHeight -= item.getHeight();
-            remainingWidth -= item.getWidth();
-            return true;
-        }
-        return false;
+    public void setRemainingWidth(int remainingWidth) {
+        this.remainingWidth = remainingWidth;
+    }
+
+    public void addItem(Item item) {
+        itemList.add(item);
+    }
+
+    public int getUpperRemainingWidth() {
+        return upperRemainingWidth;
+    }
+
+    public void setUpperRemainingWidth(int upperRemainingWidth) {
+        this.upperRemainingWidth = upperRemainingWidth;
+    }
+
+    public int getUpperNextLoc() {
+        return itemList.get(0).getWidth() - getUpperRemainingWidth();
+    }
+
+    public boolean isFull() {
+        return isFull;
+    }
+
+    public void setFull() {
+        isFull = true;
+    }
+
+    public int getFirstWidth() {
+        if (countItems() > 0)
+            return itemList.get(0).getWidth();
+        return 0;
     }
 
     public int countItems() {
         return itemList.size();
+    }
+
+    @Override
+    public String toString() {
+        return "[Items count: " + countItems() + " | Items packed: " + itemList.toString() + "]";
     }
 }
